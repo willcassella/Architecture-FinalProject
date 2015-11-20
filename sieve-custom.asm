@@ -14,6 +14,7 @@ syscall
 .eqv COUNTER $s0 	# This is the counter for the outer loop (i)
 .eqv INNER_COUNTER $s1 	# This is the counter for the inner loop
 .eqv BOOL $s2		# This is the current boolean variable from the array
+.eqv TRUE $s4		# Always set to '1' (true)
 .eqv ARRAY_INDEX $s3	# This is responsible for indexing the boolean array, since indices don't match up with COUNTER
 
 .data
@@ -23,8 +24,9 @@ space: .asciiz " "
 .text
 main:
 li MAX 200 			# Set our max to 200
-li COUNTER 3 			# Initialize counter to 2
+li COUNTER 3 			# Initialize counter to 3
 li BOOL 0			# Initialize our bool to 'false'
+li TRUE 1			# Initialize TRUE to 'true'
 FMOVE(ARRAY_INDEX, $sp)		# Set the starting point of the array to the stack pointer
 
 la $a0 start			# Print "2" to begin with, since we already know that's a prime.
@@ -36,19 +38,18 @@ bnez $t0 finish
 lb BOOL, 0(ARRAY_INDEX)		# Load the current array item
 bnez BOOL endOuterLoop		# If it's false, go to next iteration of loop
 
-# PRINT IT! (This could be optimized)
+# PRINT IT!
 FMOVE($a0, COUNTER)
 CALLSYS(1)
 la $a0 space
 CALLSYS(4)
 
-add INNER_COUNTER COUNTER COUNTER 	# Set the inner counter to counter*2, and begin inner loop
+sll INNER_COUNTER COUNTER 1 		# Set the inner counter to counter*2, and begin inner loop
 sub $t1 ARRAY_INDEX COUNTER		# We'll be using t1 to index the array in the inner loop
 	innerLoop:
 	div $t0 INNER_COUNTER MAX		# If we've reached the end, return to outer loop
 	bnez $t0 endOuterLoop			
-	li BOOL 1				# Set the array item to 'true'
-	sb BOOL 0($t1)
+	sb TRUE 0($t1)
 	add INNER_COUNTER INNER_COUNTER COUNTER # Incrememt inner counter by counter
 	sub $t1 $t1 COUNTER			# Increment array index
 	j innerLoop				# Go back to the top of the loop
