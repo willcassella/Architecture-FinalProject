@@ -1,9 +1,12 @@
-# Macros
-
-# This "fast-move" macro replaces "move", because since "move" is an "other" instruction, 
-# we have to calculate it as being 5x more expensive than "add"
+# This "fast-move" macro replaces the 'move' instruction, since 'move' is an "other" instruction
+# we have to calculate it as being 5x more expensive than "add" (even though it's probably not)
 .macro FMOVE(%lhs, %rhs)
 addi %lhs %rhs 0
+.end_macro
+
+.macro CALLSYS(%id)
+li $v0 %id
+syscall
 .end_macro
 
 # Registers that never change purpose
@@ -14,28 +17,30 @@ addi %lhs %rhs 0
 .eqv ARRAY_START $s3	# This is the start of the array of booleans (moves downward)
 
 .data
+start: .asciiz "2 "
 space: .asciiz " "
 
 .text
 main:
 li MAX 200 			# Set our max to 200
-li COUNTER 2 			# Initialize counter to 2
+li COUNTER 3 			# Initialize counter to 2
 li BOOL 0			# Initialize our bool to 'false'
 FMOVE(ARRAY_START, $sp)		# Set the starting point of the array to the stack pointer
 
+la $a0 start			# Print "2" to begin with, since we already know that's a prime.
+CALLSYS(4)
+
 outerLoop:
-bgt COUNTER MAX finish 			# If we've reached the end, move to the end of program
-sub $sp ARRAY_START COUNTER		# Calculate the current position in the array
-lb BOOL, 0($sp)				# Load the current array item
-bnez BOOL endOuterLoop			# If it's is false, go to next iteration of loop
+bgt COUNTER MAX finish		# If we've reached the end, move to the end of program
+sub $sp ARRAY_START COUNTER	# Calculate the current position in the array
+lb BOOL, 0($sp)			# Load the current array item
+bnez BOOL endOuterLoop		# If it's false, go to next iteration of loop
 
 # PRINT IT! (This could be optimized)
-li $v0 1
 FMOVE($a0, COUNTER)
-syscall
-li $v0 4
+CALLSYS(1)
 la $a0 space
-syscall
+CALLSYS(4)
 
 add INNER_COUNTER COUNTER COUNTER 	# Set the inner counter to counter*2, and begin inner loop
 	innerLoop:
@@ -46,7 +51,7 @@ add INNER_COUNTER COUNTER COUNTER 	# Set the inner counter to counter*2, and beg
 	add INNER_COUNTER INNER_COUNTER COUNTER # Incrememt inner counter by counter
 	j innerLoop				# Go back to the top of the loop
 endOuterLoop:
-addi COUNTER COUNTER 1			# Increment the counter
+addi COUNTER COUNTER 2			# Increment the counter
 j outerLoop				# Return to the top of the loop
 
 # Prime calculation has finished
