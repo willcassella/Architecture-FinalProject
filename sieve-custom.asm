@@ -32,9 +32,7 @@ FMOVE(ARRAY_INDEX, $sp)		# Set the starting point of the array to the stack poin
 la $a0 start			# Print "2" to begin with, since we already know that's a prime.
 CALLSYS(4)
 
-outerLoop:
-div $t0 COUNTER MAX		# If we've reached the end, move to the end of program
-bnez $t0 finish			
+outerLoop:		
 lb BOOL, 0(ARRAY_INDEX)		# Load the current array item
 bnez BOOL endOuterLoop		# If it's false, go to next iteration of loop
 
@@ -57,8 +55,8 @@ sub $t1 ARRAY_INDEX COUNTER		# We'll be using t1 to index the array in the inner
 endOuterLoop:
 addi COUNTER COUNTER 2			# Increment the counter
 addi ARRAY_INDEX ARRAY_INDEX -1		# Move to the next item in the array
-j outerLoop				# Return to the top of the loop
 
-# Prime calculation has finished
-finish:
+div $t0 COUNTER MAX		# If we've reached the end, move to the end of program
+beqz $t0 outerLoop	
+
 
