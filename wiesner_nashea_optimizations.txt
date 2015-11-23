@@ -1,0 +1,20 @@
+Optimiztions
+
+-only access odd numbers in the list
+
+-hardcode 2 as a prime every time
+
+-only mark false odd multiples of the number we're looking at to
+reduce cache misses
+
+-wrote our own implementation so some instructions may be in a 
+different order
+
+-use add instruction instead of mood since add is an ALU instruction
+and mov is an other instruction
+
+-reduced the number of jumps and branches
+
+-used bytes for booleans but considered using bits, since we minimized 
+cache misses we did not implement this idea
+instead of slt we use div and bnez (slt is an other instruction)
