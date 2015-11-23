@@ -44,13 +44,14 @@ CALLSYS(1)
 la $a0 space
 CALLSYS(4)
 
-sll INNER_COUNTER COUNTER 1 		# Set the inner counter to counter*2, and begin inner loop
+sll $t2 COUNTER 1
+add INNER_COUNTER COUNTER $t2 		# Set the inner counter to counter*2, and begin inner loop
 sub $t1 ARRAY_INDEX COUNTER		# We'll be using t1 to index the array in the inner loop
 	innerLoop:
 	div $t0 INNER_COUNTER MAX		# If we've reached the end, return to outer loop
 	bnez $t0 endOuterLoop			
 	sb TRUE 0($t1)
-	add INNER_COUNTER INNER_COUNTER COUNTER # Incrememt inner counter by counter
+	add INNER_COUNTER INNER_COUNTER $t2     # Incrememt inner counter by counter
 	sub $t1 $t1 COUNTER			# Increment array index
 	j innerLoop				# Go back to the top of the loop
 endOuterLoop:
